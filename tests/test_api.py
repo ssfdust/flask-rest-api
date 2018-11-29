@@ -34,6 +34,42 @@ class TestApi():
         assert ret is DocSchema
         mock_def.assert_called_once_with('Document', schema=DocSchema)
 
+    @pytest.mark.parametrize('openapi_version', ['2.0', '3.0.1'])
+    def test_api_definition_before_and_after_init(self, app, openapi_version):
+        app.config['OPENAPI_VERSION'] = openapi_version
+        api = Api()
+
+        class CustomField_1(ma.fields.Field):
+            pass
+
+        class CustomField_2(ma.fields.Field):
+            pass
+
+        api.register_field(CustomField_1, 'custom string', 'custom')
+        api.register_field(CustomField_2, 'custom string', 'custom')
+
+        @api.definition('Schema_1')
+        class Schema_1(ma.Schema):
+            int_1 = ma.fields.Int()
+            custom_1 = CustomField_1()
+
+        api.init_app(app)
+        # Access the definition to force resolution
+        # TODO: This can be removed when resolution is not postponed in apispec
+        get_definitions(api.spec)['Schema_1']['properties']['custom_1']
+
+        @api.definition('Schema_2')
+        class Schema_2(ma.Schema):
+            int_2 = ma.fields.Int()
+            custom_2 = CustomField_2()
+
+        definitions = get_definitions(api.spec)
+        assert set(definitions) == {'Schema_1', 'Schema_2'}
+        assert definitions['Schema_1']['properties']['custom_1'] == {
+            'type': 'custom string', 'format': 'custom'}
+        assert definitions['Schema_2']['properties']['custom_2'] == {
+            'type': 'custom string', 'format': 'custom'}
+
     @pytest.mark.parametrize('view_type', ['function', 'method'])
     @pytest.mark.parametrize('custom_format', ['custom', None])
     @pytest.mark.parametrize('name', ['custom_str', None])
