@@ -12,6 +12,7 @@ from flask.views import MethodView
 from flask_rest_api import Api, Blueprint, Page
 from flask_rest_api.pagination import PaginationParameters
 
+from .utils import ref_path
 
 CUSTOM_PAGINATION_PARAMS = (2, 5, 10)
 
@@ -171,7 +172,7 @@ class TestPagination():
         assert get['responses']['200']['headers'] == {
             'X-Custom-Pagination-Header': {
                 'description': 'Pagination metadata',
-                'schema': {'$ref': '#/components/schemas/PaginationHeader'},
+                'schema': {'$ref': ref_path(api.spec) + 'PaginationHeader'},
             }
         }
 

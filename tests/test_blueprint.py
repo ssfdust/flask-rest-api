@@ -11,6 +11,8 @@ from flask.views import MethodView
 from flask_rest_api import Api, Blueprint, Page
 from flask_rest_api.exceptions import InvalidLocationError
 
+from .utils import ref_path
+
 
 LOCATIONS_MAPPING = (
     ('querystring', 'query',),
@@ -223,20 +225,18 @@ class TestBlueprint():
         response = paths['/test/schema_many_false']['get']['responses']['200']
         if openapi_version == '2.0':
             schema = response['schema']
-            assert schema == {'$ref': '#/definitions/Doc'}
         else:
             schema = (
                 response['content']['application/json']['schema'])
-            assert schema == {'$ref': '#/components/schemas/Doc'}
+        assert schema == {'$ref': ref_path(api.spec) + 'Doc'}
 
         response = paths['/test/schema_many_true']['get']['responses']['200']
         if openapi_version == '2.0':
             schema = response['schema']['items']
-            assert schema == {'$ref': '#/definitions/Doc'}
         else:
             schema = (
                 response['content']['application/json']['schema']['items'])
-            assert schema == {'$ref': '#/components/schemas/Doc'}
+        assert schema == {'$ref': ref_path(api.spec) + 'Doc'}
 
     @pytest.mark.parametrize('openapi_version', ('2.0', '3.0.2'))
     def test_blueprint_pagination(self, app, schemas, openapi_version):

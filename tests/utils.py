@@ -44,3 +44,9 @@ def get_schemas(spec):
     if spec.openapi_version.major < 3:
         return spec.to_dict().get('definitions')
     return spec.to_dict()['components'].get('schemas')
+
+
+def ref_path(spec):
+    if spec.openapi_version.version[0] < 3:
+        return "#/definitions/"
+    return "#/components/schemas/"
