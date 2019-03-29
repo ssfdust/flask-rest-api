@@ -44,6 +44,13 @@ class ResponseMixin:
             doc_schema = self._make_doc_response_schema(schema)
             if doc_schema:
                 doc['responses'][str(code)]['schema'] = doc_schema
+            # Document pagination header if needed
+            if getattr(func, '_paginated', False) is True:
+                doc['responses'][str(code)]['headers'] = {
+                    self.PAGINATION_HEADER_FIELD_NAME: (
+                        self.PAGINATION_HEADER_DOC
+                    )
+                }
             func._apidoc = deepupdate(getattr(func, '_apidoc', {}), doc)
 
             @wraps(func)

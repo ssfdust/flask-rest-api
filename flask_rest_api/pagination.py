@@ -133,6 +133,11 @@ class PaginationMixin:
     DEFAULT_PAGINATION_PARAMETERS = {
         'page': 1, 'page_size': 10, 'max_page_size': 100}
 
+    PAGINATION_HEADER_DOC = {
+        'description': 'Pagination metadata',
+        'schema': PaginationHeaderSchema,
+    }
+
     def paginate(self, pager=None, *,
                  page=None, page_size=None, max_page_size=None):
         """Decorator adding pagination to the endpoint
@@ -171,6 +176,7 @@ class PaginationMixin:
             # Add pagination params to doc info in function object
             func._apidoc = getattr(func, '_apidoc', {})
             func._apidoc.setdefault('parameters', []).append(parameters)
+            func._paginated = True
 
             @wraps(func)
             def wrapper(*args, **kwargs):
