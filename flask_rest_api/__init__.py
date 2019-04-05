@@ -79,6 +79,9 @@ class Api(APISpecMixin, ErrorHandlerMixin):
 
         self._app.register_blueprint(blp, **options)
 
+        # Register API for lazy loading blueprint shemas
+        blp.init_api(self)
+
         # Register views in API documentation for this resource
         blp.register_views_in_doc(self._app, self.spec)
 

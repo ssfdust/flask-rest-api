@@ -75,6 +75,8 @@ class Blueprint(
         self._auto_docs = OrderedDict()
         self._manual_docs = OrderedDict()
         self._endpoints = []
+        self._definition = []
+        self.api = kwargs.get('api', None)
 
     def route(self, rule, **options):
         """Decorator to register url rule in application
@@ -106,6 +108,18 @@ class Blueprint(
 
             return func
 
+        return decorator
+
+    def init_api(self, api):
+        """ lazy loading schemas from blueprint """
+        self.api = api
+        for name, schema_cls, kwargs in self._definition:
+            self.api.definition(name)(schema_cls, **kwargs)
+
+    def definition(self, name):
+        def decorator(schema_cls, **kwargs):
+            self._definition.append((name, schema_cls, kwargs))
+            return schema_cls
         return decorator
 
     def _store_endpoint_docs(self, endpoint, obj, **kwargs):
