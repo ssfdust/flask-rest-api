@@ -29,7 +29,7 @@ class DocBlueprintMixin:
         api_url = self._app.config.get('OPENAPI_URL_PREFIX', None)
         if api_url is not None:
             blueprint = flask.Blueprint(
-                'api-docs',
+                "%s-docs" % self.name,
                 __name__,
                 url_prefix=_add_leading_slash(api_url),
                 template_folder='./templates',
@@ -38,7 +38,7 @@ class DocBlueprintMixin:
             json_path = self._app.config.get(
                 'OPENAPI_JSON_PATH', 'openapi.json')
             blueprint.add_url_rule(
-                _add_leading_slash(json_path),
+                "{0}{1}".format(self.name, _add_leading_slash(json_path)),
                 endpoint='openapi_json',
                 view_func=self._openapi_json)
             self._register_redoc_rule(blueprint)
@@ -81,7 +81,7 @@ class DocBlueprintMixin:
                         '{}/bundles/redoc.standalone.js'.format(redoc_version))
             self._redoc_url = redoc_url
             blueprint.add_url_rule(
-                _add_leading_slash(redoc_path),
+                "{0}{1}".format(_add_leading_slash(redoc_path), _add_leading_slash(self.name)),
                 endpoint='openapi_redoc',
                 view_func=self._openapi_redoc)
 
@@ -120,7 +120,7 @@ class DocBlueprintMixin:
                          'head', 'patch', 'trace'])
                 )
                 blueprint.add_url_rule(
-                    _add_leading_slash(swagger_ui_path),
+                    "{0}{1}".format(_add_leading_slash(swagger_ui_path), _add_leading_slash(self.name)),
                     endpoint='openapi_swagger_ui',
                     view_func=self._openapi_swagger_ui)
 
@@ -135,12 +135,13 @@ class DocBlueprintMixin:
     def _openapi_redoc(self):
         """Expose OpenAPI spec with ReDoc"""
         return flask.render_template(
-            'redoc.html', title=self._app.name, redoc_url=self._redoc_url)
+            'redoc.html', title=self.name, redoc_url=self._redoc_url
+        )
 
     def _openapi_swagger_ui(self):
         """Expose OpenAPI spec with Swagger UI"""
         return flask.render_template(
-            'swagger_ui.html', title=self._app.name,
+            'swagger_ui.html', title=self.name,
             swagger_ui_url=self._swagger_ui_url,
             swagger_ui_supported_submit_methods=(
                 self._swagger_ui_supported_submit_methods)

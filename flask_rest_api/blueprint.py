@@ -60,6 +60,7 @@ class Blueprint(
     def __init__(self, *args, **kwargs):
 
         self.description = kwargs.pop('description', '')
+        self.api = kwargs.pop('api', None)
 
         super().__init__(*args, **kwargs)
 
@@ -75,6 +76,12 @@ class Blueprint(
         self._auto_docs = OrderedDict()
         self._manual_docs = OrderedDict()
         self._endpoints = []
+
+    def definition(self, name):
+        if self.api is not None:
+            return self.api.definition(name)
+        else:
+            raise NotImplementedError
 
     def route(self, rule, **options):
         """Decorator to register url rule in application

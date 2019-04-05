@@ -15,7 +15,7 @@
    <script>
      window.onload = function() {
        const ui = SwaggerUIBundle({
-         url: "{{ url_for('api-docs.openapi_json') }}",
+         url: "{{ url_for('{}-docs.openapi_json'.format(title)) }}",
          dom_id: '#swagger-ui-container',
          deepLinking: true,
          layout: "BaseLayout",
