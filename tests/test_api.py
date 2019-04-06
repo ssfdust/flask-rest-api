@@ -36,6 +36,35 @@ class TestApi():
         assert ret is DocSchema
         mock_def.assert_called_once_with('Document', schema=DocSchema)
 
+    def test_api_blueprint(self, app):
+        api = Api(app)
+        blp = api.blueprint('test', 'test', url_prefix='/test')
+        blp_reg = Blueprint('test_reg', 'test_reg', url_prefix='/test_reg')
+
+        assert blp.api is api
+        assert blp_reg.api is None
+        assert hasattr(blp, 'definition')
+        assert not hasattr(blp_reg, 'definition')
+
+        api.register_blueprint(blp)
+        api.register_blueprint(blp_reg)
+
+        assert hasattr(blp, 'definition')
+        assert hasattr(blp_reg, 'definition')
+        assert blp_reg.definition == api.definition
+
+        assert blp.api is api
+        assert blp_reg.api is api
+        assert isinstance(blp, Blueprint)
+
+    def test_api_blueprint_before_and_after_init(self, app):
+        api = Api()
+        blp = api.blueprint('test', 'test', url_prefix='/test')
+
+        assert blp.definition == api.definition
+
+        api.init_app(app)
+
     @pytest.mark.parametrize('openapi_version', ['2.0', '3.0.2'])
     def test_api_schema_before_and_after_init(self, app, openapi_version):
         app.config['OPENAPI_VERSION'] = openapi_version

@@ -66,6 +66,18 @@ class Api(APISpecMixin, ErrorHandlerMixin):
         # Register error handlers
         self._register_error_handlers()
 
+    def blueprint(self, *args, **kwargs):
+        """
+        A blueprint factory.
+
+        :param dict reg_blp_options: kwargs to pass to Flask.register_blueprint.
+
+        :returns Blueprint: a new Blueprint isinstance.
+        """
+        blp = Blueprint(*args, api=self, **kwargs)
+
+        return blp
+
     def register_blueprint(self, blp, **options):
         """Register a blueprint in the application
 
@@ -76,6 +88,10 @@ class Api(APISpecMixin, ErrorHandlerMixin):
 
         Must be called after app is initialized.
         """
+        # Register blueprint for current api instance.
+        if blp.api is None:
+            blp.api = self
+            blp.definition = self.definition
 
         self._app.register_blueprint(blp, **options)
 

@@ -52,7 +52,12 @@ from .etag import EtagMixin
 class Blueprint(
         FlaskBlueprint,
         ArgumentsMixin, ResponseMixin, PaginationMixin, EtagMixin):
-    """Blueprint that registers info in API documentation"""
+    """
+    Blueprint that registers info in API documentation
+
+    :param str description: The blueprint description.
+    :param flask_rest_api.Api api: the flask_rest_api.Api instance.
+    """
 
     # Order in which the methods are presented in the spec
     HTTP_METHODS = ['OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE']
@@ -60,6 +65,7 @@ class Blueprint(
     def __init__(self, *args, **kwargs):
 
         self.description = kwargs.pop('description', '')
+        self.api = kwargs.pop('api', None)
 
         super().__init__(*args, **kwargs)
 
@@ -75,6 +81,8 @@ class Blueprint(
         self._auto_docs = OrderedDict()
         self._manual_docs = OrderedDict()
         self._endpoints = []
+        if self.api is not None:
+            self.definition = self.api.definition
 
     def route(self, rule, **options):
         """Decorator to register url rule in application
