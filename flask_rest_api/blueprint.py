@@ -83,6 +83,7 @@ class Blueprint(
         self._endpoints = []
         if self.api is not None:
             self.definition = self.api.definition
+            self.schema = self.api.schema
 
     def route(self, rule, **options):
         """Decorator to register url rule in application

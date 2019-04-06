@@ -92,6 +92,7 @@ class Api(APISpecMixin, ErrorHandlerMixin):
         if blp.api is None:
             blp.api = self
             blp.definition = self.definition
+            blp.schema = self.schema
 
         self._app.register_blueprint(blp, **options)
 

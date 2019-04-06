@@ -2,8 +2,10 @@
 
 import json
 import pytest
+import apispec
 
 import marshmallow as ma
+from unittest import mock
 
 from flask import jsonify
 from flask.views import MethodView
@@ -58,6 +60,25 @@ class TestBlueprint():
             # In OpenAPI v3, 'body' parameter is in 'requestBody'
             assert 'parameters' not in get
             assert 'requestBody' in get
+
+    def test_blp_schema(self, app, schemas):
+        DocSchema = schemas.DocSchema
+        api = Api(app)
+        blp = api.blueprint('test', 'test', url_prefix='/test')
+        with mock.patch.object(apispec.core.Components, 'schema') as mock_def:
+            ret = blp.schema('Document')(DocSchema)
+        assert ret is DocSchema
+        mock_def.assert_called_once_with('Document', schema=DocSchema)
+
+    def test_blp_definition(self, app, schemas):
+        """Compatibility: definition is an alias for schema"""
+        DocSchema = schemas.DocSchema
+        api = Api(app)
+        blp = api.blueprint('test', 'test', url_prefix='/test')
+        with mock.patch.object(apispec.core.Components, 'schema') as mock_def:
+            ret = blp.definition('Document')(DocSchema)
+        assert ret is DocSchema
+        mock_def.assert_called_once_with('Document', schema=DocSchema)
 
     def test_blueprint_arguments_location_invalid(self, app, schemas):
         blp = Blueprint('test', __name__, url_prefix='/test')
