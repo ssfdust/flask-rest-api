@@ -217,8 +217,10 @@ class Blueprint(
                             self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING
                     ):
                         content_type = (
+                            param.pop('content_type', None) or
                             self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING[
-                                param['in']])
+                                param['in']]
+                        )
                         if content_type != DEFAULT_REQUEST_BODY_CONTENT_TYPE:
                             operation['consumes'] = [content_type, ]
                         # body and formData are mutually exclusive
@@ -241,8 +243,10 @@ class Blueprint(
                             self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING
                     ):
                         content_type = (
+                            param.pop('content_type', None) or
                             self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING[
-                                param['in']])
+                                param['in']]
+                        )
                         request_body = {
                             x: param[x] for x in ('description', 'required')
                             if x in param
