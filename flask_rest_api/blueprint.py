@@ -60,10 +60,10 @@ class Blueprint(
     # Order in which the methods are presented in the spec
     HTTP_METHODS = ['OPTIONS', 'HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
-    DEFAULT_LOCATION_CONTENT_TYPE_MAPPING = {
-        "json": "application/json",
-        "form": "application/x-www-form-urlencoded",
-        "files": "multipart/form-data",
+    DEFAULT_LOCATION_CONTENT_TYPES_MAPPING = {
+        "json": ["application/json"],
+        "form": ["application/x-www-form-urlencoded"],
+        "files": ["multipart/form-data"],
     }
 
     def __init__(self, *args, **kwargs):
@@ -214,15 +214,18 @@ class Blueprint(
             if 'parameters' in operation:
                 for param in operation['parameters']:
                     if param['in'] in (
-                            self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING
+                            self.DEFAULT_LOCATION_CONTENT_TYPES_MAPPING
                     ):
-                        content_type = (
-                            param.pop('content_type', None) or
-                            self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING[
+                        content_types = (
+                            param.pop('content_types', None) or
+                            self.DEFAULT_LOCATION_CONTENT_TYPES_MAPPING[
                                 param['in']]
                         )
-                        if content_type != DEFAULT_REQUEST_BODY_CONTENT_TYPE:
-                            operation['consumes'] = [content_type, ]
+                        if (
+                                set(content_types) !=
+                                {DEFAULT_REQUEST_BODY_CONTENT_TYPE}
+                        ):
+                            operation['consumes'] = content_types
                         # body and formData are mutually exclusive
                         break
         # OAS 3
@@ -240,25 +243,26 @@ class Blueprint(
             if 'parameters' in operation:
                 for param in operation['parameters']:
                     if param['in'] in (
-                            self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING
+                            self.DEFAULT_LOCATION_CONTENT_TYPES_MAPPING
                     ):
-                        content_type = (
-                            param.pop('content_type', None) or
-                            self.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING[
-                                param['in']]
-                        )
                         request_body = {
-                            x: param[x] for x in ('description', 'required')
+                            x: param[x]
+                            for x in ('description', 'required')
                             if x in param
                         }
-                        for field in ('schema', 'example', 'examples'):
-                            if field in param:
-                                (
-                                    request_body
-                                    .setdefault('content', {})
-                                    .setdefault(content_type, {})
-                                    [field]
-                                ) = param.pop(field)
+                        fields = {
+                            x: param.pop(x)
+                            for x in ('schema', 'example', 'examples')
+                            if x in param
+                        }
+                        content_types = (
+                            param.pop('content_types', None) or
+                            self.DEFAULT_LOCATION_CONTENT_TYPES_MAPPING[
+                                param['in']]
+                        )
+                        for content_type in content_types:
+                            request_body.setdefault('content', {}).setdefault(
+                                content_type, fields)
                         operation['requestBody'] = request_body
                         # There can be only one requestBody
                         operation['parameters'].remove(param)

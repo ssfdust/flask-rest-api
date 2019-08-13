@@ -13,19 +13,20 @@ class ArgumentsMixin:
     ARGUMENTS_PARSER = FlaskParser()
 
     def arguments(
-            self, schema, *, location='json', content_type=None, required=True,
-            example=None, examples=None, **kwargs
+            self, schema, *, location='json', content_types=None,
+            required=True, example=None, examples=None, **kwargs
     ):
         """Decorator specifying the schema used to deserialize parameters
 
         :param type|Schema schema: Marshmallow ``Schema`` class or instance
             used to deserialize and validate the argument.
         :param str location: Location of the argument.
-        :param str content_type: Content type of the argument.
+        :param str content_types: Allowed content types for the argument.
             Should only be used in conjunction with ``json``, ``form`` or
             ``files`` location.
             The default value depends on the location and is set in
             ``Blueprint.DEFAULT_LOCATION_CONTENT_TYPE_MAPPING``.
+            This is only used for documentation purpose.
         :param bool required: Whether argument is required (default: True).
             This only affects `body` arguments as, in this case, the docs
             expose the whole schema as a `required` parameter.
@@ -49,8 +50,8 @@ class ArgumentsMixin:
             'required': required,
             'schema': schema,
         }
-        if content_type is not None:
-            parameters['content_type'] = content_type
+        if content_types is not None:
+            parameters['content_types'] = content_types
         if example is not None:
             parameters['example'] = example
         if examples is not None:
