@@ -68,9 +68,16 @@ class ArgumentsMixin:
             wrapper._apidoc = deepcopy(getattr(wrapper, '_apidoc', {}))
             wrapper._apidoc.setdefault('parameters', []).append(parameters)
 
+            locations = list(
+                set([
+                    f.metadata.get('location', location)
+                    for f in schema._declared_fields.values()
+                ])
+            )
+
             # Call use_args (from webargs) to inject params in function
             return self.ARGUMENTS_PARSER.use_args(
-                schema, locations=[location], **kwargs)(wrapper)
+                schema, locations=locations, **kwargs)(wrapper)
 
         return decorator
 
